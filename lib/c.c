@@ -725,41 +725,6 @@ void free(void *ptr)
     __freelist_head = cur;
 }
 
-void free_a(void *ptr)
-{
-    if (!ptr)
-        return;
-
-    char *__ptr = ptr;
-    chunk_t *cur = __ptr - sizeof(chunk_t);
-    if (IS_CHUNK_GET_FREED(cur->size)) {
-        printf("free(): double free detected\n");
-        abort();
-    }
-
-    chunk_t *prev;
-    if (cur->prev) {
-        prev = cur->prev;
-        prev->next = cur->next;
-    } else
-        __alloc_head = cur->next;
-
-    if (cur->next) {
-        chunk_t *next = cur->next;
-        next->prev = cur->prev;
-    } else {
-        prev->next = NULL;
-        __alloc_tail = prev;
-    }
-
-    /* Insert head in __freelist_head */
-    cur->next = __freelist_head;
-    cur->prev = NULL;
-    chunk_set_freed(cur);
-    __freelist_head->prev = cur;
-    __freelist_head = cur;
-}
-
 void snprintf(char *buffer, size_t n, char *str, ...)
 {
     int *var_args = &str + 4;
